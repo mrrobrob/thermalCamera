@@ -19,10 +19,11 @@ namespace thermalCamera.Hubs
         {
             var p = new Process();
             p.StartInfo.FileName = configuration["CameraApp"];
+            p.StartInfo.Arguments = configuration["CameraAppArgs"];
             p.StartInfo.RedirectStandardOutput = true;
 
             p.OutputDataReceived += ThermalCamera_OutputDataReceived;
-            
+
             p.Start();
 
             p.BeginOutputReadLine();
@@ -62,7 +63,7 @@ namespace thermalCamera.Hubs
         {
             if (thermalCamera != null)
             {
- //               thermalCamera.Kill();
+                thermalCamera.Kill();
             }
             await base.OnDisconnectedAsync(exception);
         }
