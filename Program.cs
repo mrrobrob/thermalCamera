@@ -1,4 +1,4 @@
-using thermalCamera;
+using thermalCamera.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

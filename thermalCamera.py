@@ -13,9 +13,9 @@ mlx.refresh_rate = adafruit_mlx90640.RefreshRate.REFRESH_2_HZ # set refresh rate
 
 frame = np.zeros((24*32,)) # setup array for storing all 768 temperatures
 while True:
-    try:
-        print("frame start")
+    try:        
         mlx.getFrame(frame) # read MLX temperatures into frame var
+        print("frame start")
         for x in frame:
             print(format(x))
         print("frame done")
