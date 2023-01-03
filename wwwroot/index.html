@@ -5,7 +5,11 @@
 </head>
 <body>
     <h1>Hello World</h1>
-    <div id="root"></div>
+    <label>Auto Temp: <input id="tempAuto" type="checkbox" checked="checked" /></label>
+    <label>Min: <input id="tempMin" type="number" value="5" /></label>
+    <label>Max: <input id="tempMax" type="number" value="25" /></label>
+    <br />
+    <canvas id="canvas" width="640" height="480" style="transform:scale(-1,1)"></canvas>
     <script src="/js/signalr/dist/browser/signalr.js"></script>
     <script src="/js/main.js"></script>
 </body>
