@@ -11,26 +11,43 @@ namespace thermalCamera.Hubs
             this.hubContext = hubContext;
         }
 
-        Process thermalCamera = null;
+        Process? thermalCamera = null;
         private IConfiguration configuration;
         private readonly IHubContext<CameraHub> hubContext;
 
+        static List<string> connectionIds = new();
+        static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+
         public override async Task OnConnectedAsync()
         {
-            var p = new Process();
-            p.StartInfo.FileName = configuration["CameraApp"];
-            p.StartInfo.Arguments = configuration["CameraAppArgs"];
-            p.StartInfo.RedirectStandardOutput = true;
+            try
+            {
+                await semaphore.WaitAsync();
 
-            p.OutputDataReceived += ThermalCamera_OutputDataReceived;
+                connectionIds.Add(Context.ConnectionId);
 
-            p.Start();
+                await base.OnConnectedAsync();
 
-            p.BeginOutputReadLine();
+                if (connectionIds.Count == 1)
+                {
+                    var p = new Process();
+                    p.StartInfo.FileName = configuration["CameraApp"];
+                    p.StartInfo.Arguments = configuration["CameraAppArgs"];
+                    p.StartInfo.RedirectStandardOutput = true;
 
-            await base.OnConnectedAsync();
+                    p.OutputDataReceived += ThermalCamera_OutputDataReceived;
 
-            thermalCamera = p;
+                    p.Start();
+
+                    p.BeginOutputReadLine();
+
+                    thermalCamera = p;
+                }
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         List<string> values = new List<string>();
@@ -61,11 +78,23 @@ namespace thermalCamera.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            if (thermalCamera != null)
+            try
             {
-                thermalCamera.Kill();
+                await semaphore.WaitAsync();
+                connectionIds.Remove(Context.ConnectionId);
+                await base.OnDisconnectedAsync(exception);
+
+                if (connectionIds.Count == 0 && thermalCamera != null)
+                {
+                    thermalCamera.Kill();
+                    thermalCamera = null;
+                }                
             }
-            await base.OnDisconnectedAsync(exception);
+            finally
+            {
+                semaphore.Release();
+            }
+
         }
     }
 }

@@ -14,7 +14,7 @@ for (var y = 0; y < 24; y++) {
 
 root.appendChild(table);*/
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/cameraHub").build();
+var connection = new signalR.HubConnectionBuilder().withUrl("cameraHub").build();
 
 connection.on("ReceiveFrame", function (frame) {
 
