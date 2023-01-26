@@ -27,40 +27,44 @@ connection.on("ReceiveFrame", function (frame) {
 
     const autoTemp = document.getElementById("tempAuto");
 
-    if (autoTemp.checked == false) {
-	min = document.getElementById("tempMin").value;
-	max = document.getElementById("tempMax").value;
+    if (autoTemp.checked) {
+        document.getElementById("tempMin").value = min;
+        document.getElementById("tempMax").value = max;
+    } else {
+        min = document.getElementById("tempMin").value;
+        max = document.getElementById("tempMax").value;
     }
 
-const canvas = document.getElementById('canvas');
-	const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-	const newPixels = [];
+    const newPixels = [];
 
     frame.pixels.forEach(function (pixel, idx) {
 
         const temp = Number(pixel);
         const normalised = Math.floor(255 * (temp - min) / (max - min));
-        const bgColor = "rgb(" + normalised.toString() + ", 0, " + (255 - normalised).toString() + ")";
 
-	    newPixels.push(normalised);
-	    newPixels.push(0);
-	    newPixels.push(255-normalised);
-	    newPixels.push(255);
-	});	
-	     const imgData = new ImageData( new Uint8ClampedArray( newPixels ), 32, 24 );
-	     ctx.putImageData( imgData, 0, 0 );
-	     ctx.globalCompositeOperation = "copy";
-	     ctx.scale( 20, 20 ); 
+        newPixels.push(normalised);
+        newPixels.push(0);
+        newPixels.push(255 - normalised);
+        newPixels.push(255);
+    });
 
-	    // newest browsers can control interpolation quality
-	     ctx.imageSmoothingQuality = "high";
-	     ctx.drawImage( canvas, 0, 0 );
-	    //
-	    // clean
-	     ctx.globalCompositeOperation = "source-over";
-	     ctx.setTransform( 1, 0, 0, 1, 0, 0);
+    const imgData = new ImageData(new Uint8ClampedArray(newPixels), 32, 24);
+    ctx.putImageData(imgData, 0, 0);
+    ctx.globalCompositeOperation = "copy";
+    ctx.scale(16, 16);
+
+    // newest browsers can control interpolation quality
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(canvas, 0, 0);
+    //
+    // clean
+    ctx.globalCompositeOperation = "source-over";
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 });
+
 connection.start()["catch"](function (err) {
     return console.error(err.toString());
 });
